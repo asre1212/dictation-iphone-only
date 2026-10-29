@@ -75,3 +75,5 @@ References:
 - https://github.com/microsoft/onnxruntime/issues/26827
 - https://bugs.webkit.org/show_bug.cgi?id=304810
 - https://huggingface.co/Xenova/whisper-tiny.en
+
+Release verification: the deployed v1.2.0 app loaded Tiny and completed two consecutive public-sample transcriptions in the cloud Chromium browser. Both returned coherent text. This exercised the shipped WASM worker, not a mocked/native Node backend. Physical iPhone microphone and Safari stability remain unverified. See [test screenshot](docs/speech-test-v1.2.jpg).
