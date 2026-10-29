@@ -1,0 +1,17 @@
+{
+  "name": "dictation-iphone",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/prepare-build.mjs && vite build && node scripts/finish-build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "serve": "vite --host 0.0.0.0"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "3.8.1"
+  },
+  "devDependencies": {
+    "vite": "6.4.1"
+  }
+}

@@ -1,0 +1,7 @@
+import {readdir,readFile,writeFile} from 'node:fs/promises';import {createHash} from 'node:crypto';
+async function walk(root){let files=[];for(const f of await readdir(root,{withFileTypes:true})){const path=`${root}/${f.name}`;files.push(...f.isDirectory()?await walk(path):[path])}return files}
+const files=(await walk('dist')).filter(p=>!p.endsWith('/sw.js'));
+const hash=createHash('sha256');for(const file of files){hash.update(file);hash.update(await readFile(file))}const version=hash.digest('hex').slice(0,12);
+const urls=files.map(p=>'./'+p.slice(5));
+await writeFile('dist/sw.js',`const CACHE='dictation-shell-${version}';\nconst FILES=${JSON.stringify(urls)};\nself.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES))));\nself.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if(key.startsWith('dictation-shell-')&&key!==CACHE)await caches.delete(key);await self.clients.claim()})()));\nself.addEventListener('fetch',event=>{const url=new URL(event.request.url);if(event.request.method!=='GET'||url.origin!==self.location.origin)return;event.respondWith((async()=>{const cache=await caches.open(CACHE);const cached=await cache.match(event.request);if(cached)return cached;try{return await fetch(event.request)}catch(error){if(event.request.mode==='navigate')return await cache.match(new URL('./index.html',self.location.href));throw error}})())});\n`);
+console.log(`Offline app ${version}: ${files.length} cached files`);
