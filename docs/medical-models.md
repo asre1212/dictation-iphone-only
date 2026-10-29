@@ -14,3 +14,17 @@ References reviewed:
 - https://huggingface.co/bizenlabs/medasr-onnx
 - https://huggingface.co/medxcribe/whisper-base.en
 - https://developer.mozilla.org/en-US/docs/Web/API/Clipboard_API
+
+## MedASR browser feasibility, reviewed 2026-10-29
+
+MedASR is not enabled in v1.1.0. The installed Transformers.js 3.8.1 source has no LASR model/feature-extractor/tokenizer integration, so changing the model ID in the existing Whisper pipeline is insufficient.
+
+A concrete browser path now exists: `ainergiz/medasr-patient-summary` contains a `web/` ONNX + WebGPU demo, and `ysdede/medasr-onnx` provides browser loading notes for external ONNX model data. These are community implementations; their claimed iPhone speed and accuracy have not been verified in this app. BizenLabs also publishes a 149 MB INT8 export, but its documented example still uses Python preprocessing and decoding. Google's original Hugging Face model requires agreeing to its access conditions and HAI-DEF terms. Do not substitute a community mirror to circumvent those conditions or embed access tokens in the public PWA.
+
+The next implementation should isolate MedASR in its own worker adapter: reproduce its 16 kHz feature extraction, run the pinned ONNX graph, decode CTC output with the matching tokenizer, and add bounded chunking. Validate a legally accessible artifact on a known fictional sample first, then on the target iPhone in Safari and as an installed PWA. Measure model download, offline reopen, memory, recording interruption, and critical transcription errors against the same Whisper recordings before offering it in the production model selector. Existing backup schema only accepts shipped model IDs; add a documented migration when MedASR is actually supported.
+
+Additional primary sources:
+- https://developers.google.com/health-ai-developer-foundations/medasr/model-card
+- https://github.com/huggingface/transformers/blob/main/docs/source/en/model_doc/lasr.md
+- https://github.com/ainergiz/medasr-patient-summary
+- https://huggingface.co/ysdede/medasr-onnx
