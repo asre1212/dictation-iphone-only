@@ -9,7 +9,7 @@ self.onmessage=async({data})=>{const{id,action,model,baseURL,samples,download=fa
   env.backends.onnx.wasm.wasmPaths=new URL('ort/',baseURL).href;
   env.backends.onnx.wasm.numThreads=1;
   if(recognizer&&activeModel!==model){await recognizer.dispose();recognizer=null;activeModel=null}
-  if(!recognizer){recognizer=await pipeline('automatic-speech-recognition',MODELS[model].id,{revision:MODELS[model].revision,dtype:'q8',device:'wasm',local_files_only:!download,progress_callback:p=>{if(p.status==='progress')self.postMessage({type:'progress',file:p.file,progress:p.progress})}});activeModel=model}
+  if(!recognizer){recognizer=await pipeline('automatic-speech-recognition',MODELS[model].id,{revision:MODELS[model].revision,dtype:'q8',device:'wasm',local_files_only:!download,progress_callback:p=>{if(p.status==='progress')self.postMessage({type:'progress',file:p.file,progress:p.progress,download})}});activeModel=model}
   self.postMessage({id,ok:true});
  }else if(action==='transcribe'){
   if(!recognizer)throw Error('Load a model first');
