@@ -4,15 +4,15 @@ A separate, local-first iPhone PWA. Tap the microphone to record, tap again to s
 
 ## Use
 
-Open the published GitHub Pages URL in Safari, choose **Share → Add to Home Screen**, then tap **Download & prepare Whisper** while online. Keep the app open until the selected model and offline app are ready. Start with Base English; Small English is an optional, larger comparison. Tap the microphone, allow access, dictate, and tap it again. Recordings stop at three minutes or when the app is hidden. Each completed recording appends to the editable transcript. Copy before clearing or closing/reloading; draft text is held in memory, not persisted.
+Open the published GitHub Pages URL in Safari, choose **Share → Add to Home Screen**, then tap **Prepare Whisper (download if needed)** while online. Keep the app open until the selected model and offline app are ready. Start with Tiny English. Base and Small are larger, optional models that can exceed phone memory. Tap the microphone, allow access, dictate, and tap it again. Recordings stop at 30 seconds or when the app is hidden. Each completed recording appends to the editable transcript. Copy before clearing or closing/reloading; draft text is held in memory, not persisted.
 
-The offline app cache includes local scripts, worker code, audio worklet, and ONNX WASM runtime. Model assets are downloaded separately into Transformers.js cache. A cached model is checked at startup without remote model downloads. iOS/browser storage eviction can remove either cache; reopen online and prepare again if necessary. The first installation and model download require internet.
+The offline app cache includes local scripts, worker code, audio worklet, and ONNX WASM runtime. Model assets are downloaded separately into Transformers.js cache. The engine loads only after an explicit Prepare tap, allowing the app to open and update without immediately recreating a crashed runtime. Cached files are reused. iOS/browser storage eviction can remove either cache; reopen online and prepare again if necessary. The first installation and model download require internet.
 
 ## Medical terminology
 
 Settings includes GI vocabulary and optional exact-phrase spelling suggestions. Format: `preferred spelling | misheard phrase`, one entry per line. Reference terms without an alias do not bias the acoustic model. Suggestions are displayed for explicit approval and never automatically rewrite your note. Personal aliases are local deterministic corrections, not model fine-tuning. Phone-transfer backups include vocabulary and settings. Current transcript text is included only if you select that option. Recordings and model weights are never exported.
 
-This release uses pinned Hugging Face Whisper Base/Small English via Transformers.js 3.8.1 and ONNX Runtime Web WASM in a dedicated Web Worker. It does not claim to ship a medical-trained model or an LLM cleanup pass. See [medical-model evaluation](docs/medical-models.md) for the next comparison.
+This release uses pinned Hugging Face Whisper Tiny/Base/Small English via Transformers.js 3.8.1 and ONNX Runtime Web WASM in a dedicated Web Worker. It does not claim to ship a medical-trained model or an LLM cleanup pass. See [medical-model evaluation](docs/medical-models.md) for the next comparison.
 
 ## Privacy
 
@@ -60,3 +60,18 @@ Imports validate the complete file before changing anything, are limited to 1 MB
 ## Spoken punctuation (v1.1.1)
 
 With **Recognize spoken punctuation and line breaks** enabled in Settings (the existing formatting preference, on by default), say comma, period/full stop, question mark, exclamation mark/point, colon, or semicolon to insert punctuation. New line/next line and new paragraph/next paragraph insert line and paragraph breaks. Conversion applies only to newly recognized speech; manually edited text stays unchanged. Turn formatting off when you need those words literally, such as anatomical “colon” or “period”.
+
+## iPhone crash mitigation (v1.2.0)
+
+The reported Safari page-reset screen does not identify the cause by itself. Source inspection found that v1.1.1 bundled the JSEP ONNX runtime despite selecting `device: 'wasm'`. Upstream reports describe WebKit compilation memory spikes with that runtime. This release aliases ONNX to the matching non-JSEP CPU-only JavaScript and WASM from the same pinned package; it does not enable WebGPU or change inference to a server. The production build fails if the old JSEP binary is bundled again.
+
+Existing preferences migrate once to Tiny English, preserving vocabulary and formatting. Models no longer load automatically on page open. Capture downsamples incrementally to 16 kHz, caps audio at 30 seconds in the worklet as well as the page timer, and exposes a microphone level meter. A model change terminates the previous worker before loading another model. Processing requests have deadlines and a Cancel action. Text appears after Stop and transcription, not live during recording.
+
+If Safari previously crashed: close that tab/app window, reopen online, check for version 1.2.0 in Settings, and prepare Tiny English. **Test speech engine** in Settings downloads the public JFK sample from Hugging Face and transcribes it locally without using the microphone or altering your draft. It requires internet for the sample. Then try a 5–10 second microphone recording. Do not clear all Safari website data; that would also remove unrelated local PWA data on the same origin. No microphone or transcript data is uploaded by the test.
+
+Validation covers 16/44.1/48 kHz capture, final audio flush, capture limits, existing functionality, and absence of JSEP in the production bundle. A desktop browser test does not prove resolution of a physical iPhone Safari crash; actual iPhone recording and repeated inference still need verification on that device.
+
+References:
+- https://github.com/microsoft/onnxruntime/issues/26827
+- https://bugs.webkit.org/show_bug.cgi?id=304810
+- https://huggingface.co/Xenova/whisper-tiny.en

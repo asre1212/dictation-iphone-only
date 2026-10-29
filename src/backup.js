@@ -23,7 +23,7 @@ export function parseBackup(text) {
   // Vocabulary files from the original release remain importable.
   if (data.version === 1 && !data.app) return {legacy:true, vocabulary:vocabulary(data.vocabulary)};
   if (data.app !== 'dictation-iphone' || data.version !== 2) throw Error('This backup format is not supported. Update the app, then try again.');
-  if (!data.settings || !['base','small'].includes(data.settings.model) || typeof data.settings.format !== 'boolean')
+  if (!data.settings || !['tiny','base','small'].includes(data.settings.model) || typeof data.settings.format !== 'boolean')
     throw Error('The backup contains invalid settings.');
   if (data.transcript !== undefined && (typeof data.transcript !== 'string' || data.transcript.length > MAX_TRANSCRIPT))
     throw Error('The backup transcript is invalid or too large.');
