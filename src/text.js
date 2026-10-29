@@ -17,7 +17,15 @@ const escapeRegExp=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 export function phrasePattern(phrase){return new RegExp(`(?<![\\p{L}\\p{N}])${escapeRegExp(phrase)}(?![\\p{L}\\p{N}])`,'giu')}
 export function suggestions(text,vocabulary){return vocabulary.filter(v=>v.heard&&v.heard.toLocaleLowerCase()!==v.term.toLocaleLowerCase()&&phrasePattern(v.heard).test(text)).slice(0,12)}
 export function applyCorrection(text,{heard,term}){return text.replace(phrasePattern(heard),()=>term)}
-export function formatSpeech(text,enabled){if(!enabled)return text.trim();return text.replace(/\bnew paragraph\b[,.]?/gi,'\n\n').replace(/\bnew line\b[,.]?/gi,'\n').replace(/[^\S\n]*\n[^\S\n]*/g,'\n').trim()}
+export function formatSpeech(text,enabled){
+  if(!enabled)return text.trim();
+  const punctuation={comma:',',period:'.','full stop':'.','question mark':'?','exclamation mark':'!','exclamation point':'!',semicolon:';',colon:':'};
+  return text
+    .replace(/\b(?:new|next) paragraph\b[,.]?/gi,'\n\n')
+    .replace(/\b(?:new|next) line\b[,.]?/gi,'\n')
+    .replace(/[ \t]*[,.;:!?]?[ \t]*\b(comma|period|full stop|question mark|exclamation mark|exclamation point|semicolon|colon)\b[,.!?;:]?/gi,(_,command)=>punctuation[command.toLowerCase()])
+    .replace(/[^\S\n]*\n[^\S\n]*/g,'\n').trim();
+}
 export function appendTranscript(current,next){if(!next)return current;return current?current.replace(/\s+$/,'')+'\n\n'+next:next}
 export function wordCount(text){return text.trim()?text.trim().split(/\s+/u).length:0}
 export function hasSpeech(samples){let sum=0;for(const x of samples)sum+=x*x;return samples.length>4000&&Math.sqrt(sum/samples.length)>.002}

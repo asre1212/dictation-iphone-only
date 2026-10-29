@@ -56,3 +56,7 @@ Upgrading from v1.0 requires closing all existing Dictation windows and reopenin
 5. Review the import summary, choose append/replace/skip for any transcript, and tap **Import backup**. Append is the default and preserves existing text. Download the selected speech model on the new phone while online.
 
 Imports validate the complete file before changing anything, are limited to 1 MB, and support original v1 vocabulary-only backups. Imported transcript text remains an in-memory draft. Copy it before closing or ordinary reloading. Backups do not transfer microphone permissions, the Home Screen installation, or downloaded speech models.
+
+## Spoken punctuation (v1.1.1)
+
+With **Recognize spoken punctuation and line breaks** enabled in Settings (the existing formatting preference, on by default), say comma, period/full stop, question mark, exclamation mark/point, colon, or semicolon to insert punctuation. New line/next line and new paragraph/next paragraph insert line and paragraph breaks. Conversion applies only to newly recognized speech; manually edited text stays unchanged. Turn formatting off when you need those words literally, such as anatomical “colon” or “period”.

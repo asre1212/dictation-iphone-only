@@ -1,7 +1,7 @@
 {
   "name": "dictation-iphone",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "module",
   "scripts": {
     "build": "node scripts/prepare-build.mjs && vite build && node scripts/finish-build.mjs",

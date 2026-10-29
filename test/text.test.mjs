@@ -5,3 +5,12 @@ test('formatting is explicit and does not rewrite negation or doses',()=>{assert
 test('subsequent dictation appends without overwriting manual edits',()=>assert.equal(appendTranscript('Edited note.','Next part.'),'Edited note.\n\nNext part.'));
 test('audio resampling yields 16k and silence does not go to recognition',()=>{const source=new Float32Array(48000).fill(.1),out=downsample(source,48000);assert.equal(out.length,16000);assert.ok(Math.abs(out[0]-.1)<1e-6);assert.equal(hasSpeech(out),true);assert.equal(hasSpeech(new Float32Array(16000)),false)});
 test('vocabulary size is bounded',()=>assert.equal(parseVocabulary(Array(500).fill('test').join('\n')).length,200));
+test('spoken punctuation preserves doses, negation, and disabled literal wording',()=>{
+ assert.equal(formatSpeech('No pain comma no bleeding period New paragraph. Continue 2.5 mg daily period.',true),'No pain, no bleeding.\n\nContinue 2.5 mg daily.');
+ assert.equal(formatSpeech('No pain, comma, no bleeding. Period.',true),'No pain, no bleeding.');
+ assert.equal(formatSpeech('Any pain question mark',true),'Any pain?');
+ assert.equal(formatSpeech('The colon is normal during this period.',false),'The colon is normal during this period.');
+ assert.equal(formatSpeech('Periodic symptoms.',true),'Periodic symptoms.');
+});
+
+test('next line and next paragraph are alternatives to new line and new paragraph',()=>{assert.equal(formatSpeech('First period Next line. Second period Next paragraph. Third period',true),'First.\nSecond.\n\nThird.');assert.equal(formatSpeech('Next line',false),'Next line')});
